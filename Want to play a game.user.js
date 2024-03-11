@@ -12,6 +12,11 @@
 
 (function() {
     'use strict';
+        // Check if "Tap cards to reveal..." is present on the page
+    if (!document.body.textContent.includes("Tap cards to reveal...")) {
+        console.log("The script will not run as the required text is not found.");
+        return; // Exit the script if the text is not found
+    }
 
 
 
