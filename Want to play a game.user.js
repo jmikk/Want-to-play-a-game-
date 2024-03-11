@@ -6,6 +6,8 @@
 // @author       9003
 // @match        https://www.nationstates.net/page=deck*
 // @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 (function() {
@@ -23,6 +25,21 @@
 
 
 
+
+
+
+
+
+
+        // Function to prompt for and store the user agent if it's not already set
+    function getUserAgent() {
+        let userAgent = GM_getValue('userAgent');
+        if (!userAgent) {
+            userAgent = prompt('Enter your User Agent: THIS SCRIPT WILL JUNK CARDS IF YOU GUESS WRONG. You have been warned and I will laugh if you junk a legendary.');
+            GM_setValue('userAgent', userAgent);
+        }
+        return userAgent;
+    }
 
 
 
@@ -50,6 +67,8 @@
 
     // Function to handle the click event on a card
     function handleCardClick(event) {
+        // Call getUserAgent to ensure we have a User Agent set before continuing
+        const userAgent = getUserAgent();
         // Prevent the default action to "flip" the card
         event.preventDefault();
 
@@ -73,7 +92,8 @@
             card.removeEventListener('click', handleCardClick);
 
             // Make the AJAX request
-            const url = `https://www.nationstates.net/page=ajax3/a=junkcard/card=${cardId}/season=${season}/User_agent=9006/Script=Guessing_game/Author_discord=9003/Author_main_nation=9003`;
+            const timestamp = new Date().getTime(); // Get current timestamp
+            const url = `https://www.nationstates.net/page=ajax3/a=junkcard/card=${cardId}/season=${season}/User_agent=${userAgent}/Script=Do_you_want_to_play_a_game/Author_discord=9003/Author_main_nation=9003/timestamp=${timestamp}`;
 
             GM_xmlhttpRequest({
                 method: "GET",
