@@ -70,10 +70,16 @@
         return overlay;
     }
 
+    // Function to extract localid from the fetched page
+    function extractLocalId(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const localIdInput = doc.querySelector('input[name="localid"]');
+        return localIdInput ? localIdInput.value : null;
+    }
+
     // Function to handle the click event on a card
     function handleCardClick(event) {
-        // Call getUserAgent to ensure we have a User Agent set before continuing
-        const userAgent = getUserAgent();
         // Prevent the default action to "flip" the card
         event.preventDefault();
 
@@ -89,31 +95,43 @@
 
         // Check if the guess is correct
         if (guess !== cardId) {
-            // If the guess is incorrect, display the "WRONG" overlay permanently
-            const wrongOverlay = createWrongOverlay();
-            card.appendChild(wrongOverlay);
-
-            // Remove event listener to prevent further clicks
-            card.removeEventListener('click', handleCardClick);
-
-            // Make the AJAX request
-            const timestamp = new Date().getTime(); // Get current timestamp
-            const url = `https://www.nationstates.net/page=ajax3/a=junkcard/card=${cardId}/season=${season}/User_agent=${userAgent}/Script=Do_you_want_to_play_a_game/Author_discord=9003/Author_main_nation=9003/timestamp=${timestamp}`;
+            // If the guess is incorrect, first fetch the page to get localid
+            const getUrl = `https://www.nationstates.net/page=deck/card=${cardId}/season=${season}/gift=1`;
 
             GM_xmlhttpRequest({
                 method: "GET",
-                url: url,
+                url: getUrl,
                 onload: function(response) {
-                    // Handle the response from the server
-                    console.log('Request made to: ' + url);
-                    console.log('Response:', response.responseText);
+                    const localId = extractLocalId(response.responseText);
+                    if (localId) {
+                        // Make the POST request with localid, entity_name, and send_gift
+                        const postUrl = `https://www.nationstates.net/page=deck/card=${cardId}/season=${season}`; // Replace with your actual POST request URL
+                        const data = `localid=${localId}&entity_name=9006&send_gift=1`;
+
+                        GM_xmlhttpRequest({
+                            method: "POST",
+                            url: postUrl,
+                            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                            data: data,
+                            onload: function(response) {
+                                // Handle the response from the server
+                                console.log('POST Request made to: ' + postUrl);
+                                console.log('Response:', response.responseText);
+                                const wrongOverlay = createWrongOverlay();
+                                card.appendChild(wrongOverlay);
+                            }
+                        });
+                    } else {
+                        console.error("Failed to extract localid.");
+                    }
                 }
             });
         } else {
             // If the guess is correct, notify the user
             alert('Congratulations! You guessed the correct ID.');
-            card.removeEventListener('click', handleCardClick);
         }
+        // Remove the event listener to prevent further clicks
+        card.removeEventListener('click', handleCardClick);
     }
 
     // Add click event listeners to all card elements
