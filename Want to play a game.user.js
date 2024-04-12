@@ -97,7 +97,7 @@
         const season = card.getAttribute('data-season');
 
         // Prompt the user to guess the card ID
-        const guess = prompt('Guess the ID of this card:');
+        const guess = prompt('Guess the ID of this card: If you get this wrong it will gift 9006 the card.');
 
         // Check if the guess is correct
         if (guess !== cardId) {
