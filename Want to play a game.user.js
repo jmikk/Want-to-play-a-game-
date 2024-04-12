@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Want to play a game?
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      3
 // @description  THIS SCRIPT WILL JUNK CARDS IF YOU GUESS WRONG
 // @author       9003
 // @match        https://www.nationstates.net/page=deck*
@@ -17,6 +17,12 @@
         console.log("The script will not run as the required text is not found.");
         return; // Exit the script if the text is not found
     }
+
+
+        const figures = document.querySelectorAll('.back');
+    figures.forEach(function(figure) {
+        figure.textContent = 'Want to play a game? Click me to flip a card and get the localID to gift it to 9006 if you guess the id wrong!'; // Change text for all matching elements
+    });
 
 
 
